@@ -1,0 +1,6 @@
+# Camspector
+
+This project aims to download the webcam footage from the PCC website
+and any webcam website using headless browser API. Given this footage
+it runs a classification model on the footage attempting to find cars and
+pedestrians. Keeping a running total of cars and pedestrians etc.
