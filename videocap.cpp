@@ -2,6 +2,7 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp>
+#include <opencv2/video/background_segm.hpp>
 #include <opencv2/imgproc.hpp>
 
 #include <iostream>
@@ -65,9 +66,18 @@ int main(int argc, char* argv[])
       return 1;
     }
     
+    // create a background subtractor
+    Ptr<BackgroundSubtractor> bgsub = createBackgroundSubtractorMOG2(250, 16, false);
+    
+    Mat fgmask;
+    
     // Loop until a keypress is received
     cout << "Writing videofile: " << filename << endl
          << "Press any key to terminate" << endl;
+         
+   int ms;
+    cout << "min size?\n"; 
+    cin >> ms;
     while (waitKey(5) < 0)
     {
         // Abort if unable to read a frame from the capture
@@ -79,18 +89,33 @@ int main(int argc, char* argv[])
         Mat frame_gray;
         
         cvtColor(src, frame_gray, COLOR_BGR2GRAY);
-        equalizeHist(frame_gray, frame_gray);
+        GaussianBlur(frame_gray, frame_gray, Size(5,5), 0);
+        dilate(frame_gray, frame_gray,
+                     getStructuringElement(MORPH_RECT, Size(3,3)));
+        morphologyEx(frame_gray, frame_gray, MORPH_CLOSE,
+                     getStructuringElement(MORPH_ELLIPSE, Size(2,2)));
+        
+        
+        bgsub->apply(frame_gray, fgmask);
         
         std::vector<Rect> cars;
         car_cascade.detectMultiScale(frame_gray, cars);
         
         for (size_t i = 0; i < cars.size(); i++)
         {
-            rectangle(src, cars[i], cv::Scalar(0, 255, 0));
+            // check if the detected object is not considered part
+            // of the background
+            Mat roi(fgmask, cars[i]);
+            if (mean(roi)[0] > 10.0)
+            {
+               putText(src, format("%f", mean(roi)[0]), Point(cars[i].x, cars[i].y-16), 
+                       FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 0, 0));
+               rectangle(src, cars[i], cv::Scalar(0, 255, 0));
+            }
         }
         
         // encode the frame into the videofile stream
-        writer.write(src);
+        writer.write(frame_gray);
         
         // show live and wait for a key with timeout long enough to show images
         imshow("Live", src);

@@ -1,15 +1,21 @@
 #!/usr/bin/python3
 
-import requests, re
+import requests, re, sys
 
-#STREAM_URL = "https://live.streamdays.com/vyepr4z4"
-#CAM_NAME   = "pensacolachristiancollege-camp-east"
+stream = sys.argv[1]
 
-#STREAM_URL = "https://live.streamdays.com/zy4h642p"
-#CAM_NAME   = "pensacolachristiancollege-south"
-
-STREAM_URL = "https://live.streamdays.com/nlp1lcbq"
-CAM_NAME   = "pensacolachristiancollege-camp-south"
+if stream == "1":
+   STREAM_URL = "https://live.streamdays.com/vyepr4z4"
+   CAM_NAME   = "pensacolachristiancollege-camp-east"
+elif stream == "2":
+   STREAM_URL = "https://live.streamdays.com/zy4h642p"
+   CAM_NAME   = "pensacolachristiancollege-south"
+elif stream == "3":
+   STREAM_URL = "https://live.streamdays.com/nlp1lcbq"
+   CAM_NAME   = "pensacolachristiancollege-camp-south"
+elif stream == "4":
+   STREAM_URL = "https://live.streamdays.com/ci7ssg3y"
+   CAM_NAME   = "picci-edu-west"
 
 
 needed_headers = {"referer": "https://www.pcci.edu/",
